@@ -29,3 +29,4 @@ def build_unet(input_shape):
     print(s1.shape, s2.shape, s3.shape, s4.shape)
     
 build_unet((256, 256, 3))
+print("ok")
