@@ -68,48 +68,54 @@ def tf_dataset(X, Y, batch=2):
     return dataset
 
 
-create_dir("files")
-
-#hyperparameter
-batch_size=16
-lr= 1e-4
-num_epochs=200
-model_path=os.path.join("files", "model.keras")
-csv_path= os.path.join("files", "log.csv")
-(train_x, train_y), (valid_x, valid_y), (test_x, test_y)=load_dataset('./data')
-
-print("train: {}- {}".format(len(train_x),len(train_y)))
-print("valid: {}- {}".format(len(valid_x),len(valid_y)))
-print("test: {}- {}".format(len(test_x),len(test_y)))
-
-
-train_dataset= tf_dataset(train_x, train_y, batch_size)
-valid_dataset= tf_dataset(valid_x, valid_y, batch_size)
-
-test_dataset= tf_dataset(test_x, test_y, 16)
-###Model
-
-model= build_unet((128, 128, 3))
-model.compile(loss=dice_loss, optimizer=Adam(lr), metrics=[dice_coef])
-
-callbacks= [
-    ModelCheckpoint(model_path, verbose=1, save_best_only=True),
-    ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1),
-    CSVLogger(csv_path),
-    EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=False)
-]
-
-model.fit(
-    train_dataset, epochs=num_epochs,validation_data=valid_dataset,
-    callbacks=callbacks
-)
-
-model.save('model_k_frmt.keras')
 
 import tensorflow as tf
 
-new_model=tf.keras.models.load_model('model_k_frmt.keras',custom_objects={'dice_loss': dice_loss})
 
-loss, acc= new_model.evaluate(test_dataset, verbose=2)
 
-print(loss, acc)
+
+if __name__=="__main__":
+    create_dir("files")
+
+    #hyperparameter
+    batch_size=16
+    lr= 1e-4
+    num_epochs=200
+    model_path=os.path.join("files", "model.keras")
+    csv_path= os.path.join("files", "log.csv")
+    (train_x, train_y), (valid_x, valid_y), (test_x, test_y)=load_dataset('./data')
+
+    print("train: {}- {}".format(len(train_x),len(train_y)))
+    print("valid: {}- {}".format(len(valid_x),len(valid_y)))
+    print("test: {}- {}".format(len(test_x),len(test_y)))
+
+
+    train_dataset= tf_dataset(train_x, train_y, batch_size)
+    valid_dataset= tf_dataset(valid_x, valid_y, batch_size)
+
+    test_dataset= tf_dataset(test_x, test_y, 16)
+    ###Model
+
+    model= build_unet((128, 128, 3))
+    model.compile(loss=dice_loss, optimizer=Adam(lr), metrics=[dice_coef])
+
+    callbacks= [
+        ModelCheckpoint(model_path, verbose=1, save_best_only=True),
+        ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1),
+        CSVLogger(csv_path),
+        # EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=False)
+    ]
+
+    # model.fit(
+    #     train_dataset, epochs=num_epochs,validation_data=valid_dataset,
+    #     callbacks=callbacks
+    # )
+
+    # model.save('model_k_frmt.keras')
+
+
+    new_model=tf.keras.models.load_model('model_k_frmt.keras',custom_objects={'dice_loss': dice_loss})
+
+    loss, acc= new_model.evaluate(test_dataset, verbose=2)
+
+    print(loss, acc)
